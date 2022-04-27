@@ -11,9 +11,6 @@ import (
 )
 
 func main() {
-	os.Setenv("SLACK_BOT_TOKEN", "xoxb-2149077173828-3465010216224-AhZoXj0rcGqZfS5061BiTuHP")
-	os.Setenv("SLACK_APP_TOKEN", "xapp-1-A03CZ6E5LLT-3441211155506-a9c380773f22ab50913c4255f3d9b97829ce66222f1983a7cb72264c7cb80f18")
-
 	bot := slacker.NewClient(os.Getenv("SLACK_BOT_TOKEN"), os.Getenv("SLACK_APP_TOKEN"))
 
 	go printCommandEvents(bot.CommandEvents())
