@@ -5,8 +5,11 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"regexp"
 	"restaurant-scrapper/scrapper"
 
+	"github.com/enescakir/emoji"
+	"github.com/fatih/color"
 	"github.com/shomali11/slacker"
 )
 
@@ -21,9 +24,16 @@ func main() {
 		Handler: func(botCtx slacker.BotContext, request slacker.Request, response slacker.ResponseWriter) {
 			dishes := scrapper.Scrapper("boutique.wysifood.fr", "https://boutique.wysifood.fr/5bde4fa022f9e550534f93537e604529/take-away/menu/15809")
 
-			var r string
+			italic := color.New(color.Italic).SprintFunc()
+			vege := regexp.MustCompile(`\(V\)|veggie`)
+
+			r := "---------Plats principaux (généralement 11.90eu)---------\n"
 			for _, d := range dishes {
-				r = r + fmt.Sprintf("%s\n%s\n\n", d.DishName, d.Description)
+				if vege.MatchString(d.DishName) {
+					r = r + fmt.Sprintf("%v\n%s\n\n", d.DishName+" "+string(emoji.LeafyGreen), italic(d.Description))
+				} else {
+					r = r + fmt.Sprintf("%s\n%s\n\n", d.DishName, italic(d.Description))
+				}
 			}
 
 			response.Reply(r)

@@ -1,6 +1,7 @@
 package scrapper
 
 import (
+	"regexp"
 	"strings"
 
 	"github.com/gocolly/colly"
@@ -20,22 +21,32 @@ func Scrapper(domain string, address string) []Dish {
 		var list_description []string
 
 		dishName := strings.Split(e.ChildText("div.row > div.col-md-6 > h4.item-head"), "\n")
+		re := regexp.MustCompile("^([A-Z]{2})+")
 		for index, name := range dishName {
 			if index > 0 {
-				if strings.Contains(name, "GOURMANDISE") {
-					break
-				}
 				n := strings.TrimSpace(name)
 
-				list_name = append(list_name, n)
+				if re.MatchString(n) {
+					break
+				} else {
+					list_name = append(list_name, n)
+				}
 			}
 		}
 
 		description := strings.Split(e.ChildText("div.row > div.col-md-6 > div.item-description"), "\n")
-		for _, desc := range description {
+		for index, desc := range description {
 			d := strings.TrimSpace(desc)
 
 			if d != "" && !strings.Contains(d, "Attention") {
+				if index > 1 && index < (len(description)-1) && strings.TrimSpace(description[index-1]) != "" && strings.TrimSpace(description[index+1]) == "" {
+					for i, element := range list_description {
+						if element == strings.TrimSpace(description[index-1]) {
+							list_description[i] = strings.Join([]string{element, d}, " ")
+							continue
+						}
+					}
+				}
 				list_description = append(list_description, d)
 			}
 		}
