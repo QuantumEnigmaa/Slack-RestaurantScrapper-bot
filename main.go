@@ -11,6 +11,7 @@ import (
 	"github.com/enescakir/emoji"
 	"github.com/fatih/color"
 	"github.com/shomali11/slacker"
+	"github.com/slack-go/slack"
 )
 
 func main() {
@@ -18,14 +19,14 @@ func main() {
 
 	go printCommandEvents(bot.CommandEvents())
 
-	bot.Command("menu", &slacker.CommandDefinition{
+	bot.Command("menu-spok", &slacker.CommandDefinition{
 		Description: "Spok menu descriptor",
-		Example:     "menu",
+		Example:     "menu-spok",
 		Handler: func(botCtx slacker.BotContext, request slacker.Request, response slacker.ResponseWriter) {
 			dishes := scrapper.Scrapper("boutique.wysifood.fr", "https://boutique.wysifood.fr/5bde4fa022f9e550534f93537e604529/take-away/menu/15809")
 
 			italic := color.New(color.Italic).SprintFunc()
-			vege := regexp.MustCompile(`\(V\)|veggie`)
+			vege := regexp.MustCompile(`\(V\)|veggie|\(\ V\)|\(V\ \)|\(\ V\ \)`)
 
 			r := "---------Plats principaux (généralement 11.90eu)---------\n"
 			for _, d := range dishes {
@@ -37,6 +38,22 @@ func main() {
 			}
 
 			response.Reply(r)
+		},
+	})
+
+	bot.Command("get-menu-file", &slacker.CommandDefinition{
+		Description: "Upload on chat the csv file containing all past menus",
+		Example:     "get-menu-file",
+		Handler: func(botCtx slacker.BotContext, request slacker.Request, response slacker.ResponseWriter) {
+			ev := botCtx.Event()
+			client := botCtx.Client()
+
+			if ev.Channel != "" {
+				_, err := client.UploadFile(slack.FileUploadParameters{File: "menu.csv", Channels: []string{ev.Channel}})
+				if err != nil {
+					fmt.Printf("Error encountered when uploading file: %+v\n", err)
+				}
+			}
 		},
 	})
 

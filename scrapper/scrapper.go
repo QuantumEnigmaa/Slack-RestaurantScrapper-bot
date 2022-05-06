@@ -1,8 +1,12 @@
 package scrapper
 
 import (
+	"encoding/csv"
+	"log"
+	"os"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/gocolly/colly"
 )
@@ -62,5 +66,29 @@ func Scrapper(domain string, address string) []Dish {
 	})
 
 	collector.Visit(address)
+
+	var menu [][]string
+	for _, d := range list_dish {
+		var dish []string
+
+		dish = append(dish, d.DishName, time.Now().UTC().String())
+		menu = append(menu, dish)
+	}
+
+	writeMenuToCsv("menu.csv", menu)
+
 	return list_dish
+}
+
+func writeMenuToCsv(filename string, data [][]string) {
+	file, err := os.OpenFile(filename, os.O_RDWR, 0755)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+
+	writer.WriteAll(data)
 }
