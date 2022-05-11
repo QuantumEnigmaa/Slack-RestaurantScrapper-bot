@@ -67,15 +67,17 @@ func Scrapper(domain string, address string) []Dish {
 
 	collector.Visit(address)
 
-	var menu [][]string
-	for _, d := range list_dish {
-		var dish []string
+	if len(list_dish) > 0 {
+		var menu [][]string
+		for _, d := range list_dish {
+			var dish []string
 
-		dish = append(dish, d.DishName, time.Now().UTC().String())
-		menu = append(menu, dish)
+			dish = append(dish, d.DishName, time.Now().UTC().String())
+			menu = append(menu, dish)
+		}
+
+		writeMenuToCsv("menu.csv", menu)
 	}
-
-	writeMenuToCsv("menu.csv", menu)
 
 	return list_dish
 }
